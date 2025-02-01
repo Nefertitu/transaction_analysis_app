@@ -1,30 +1,18 @@
 import pytest
 
-from unittest.mock import patch
+from unittest.mock import patch, mock_open
 
 import pandas as pd
 
 from src.utils import get_read_excel, path_file
+from tests.conftest import data_for_test_pd, data_for_test_pd_result
 
 
 @patch("pandas.read_excel")
-def test_get_read_excel(mock_read_excel: pd.DataFrame):
-    """
-    Проверяет, что функция читает XLSX-файл и возвращает список словарей
-    с данными о финансовых транзакциях
-    :param mock_read_excel:
-    :return:
-    """
-
-    sample_data = {"Дата операции": ["31.12.2021 16:44:00", "31.12.2021 16:42:04"], "Сумма операции с округлением": [160.89, 64.00]}
-    mock_data = pd.DataFrame(sample_data)
-    mock_read_excel.return_value = mock_data
-    result = get_read_excel("sample")
-    expected = [
-        {"Дата операции": "31.12.2021 16:44:00", "Сумма операции с округлением": 160.89},
-        {"Дата операции": "31.12.2021 16:42:04", "Сумма операции с округлением": 64.00},
-    ]
-    assert result == expected
+def test_get_read_excel(mock_read_excel, data_for_test_pd_result):
+    mock_read_excel.return_value = data_for_test_pd_result
+    result = get_read_excel("test.xlsx")
+    pd.testing.assert_frame_equal(result, data_for_test_pd_result)
 
 
 @patch("pandas.read_excel")
