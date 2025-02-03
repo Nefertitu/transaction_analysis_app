@@ -1,6 +1,7 @@
-from typing import List, Dict, Any, Hashable
+from typing import Dict, Any
 
-from src.utils import get_list_dict_transactions, get_required_columns, path_file, get_read_excel, get_formatted_date
+from src.utils import get_list_dict_transactions, get_required_columns, path_file, get_read_excel, get_formatted_date, \
+    get_to_json_investment_savings
 
 
 def get_investment_savings(month: str, transactions: list[Dict[str, Any]], limit: int) -> float:
@@ -32,8 +33,8 @@ trans = get_read_excel(path_to_file)
 my_columns = ["Дата операции", "Сумма операции"]
 df = get_required_columns(trans, my_columns)
 transactions_with_formatted_date = get_formatted_date(df)
-# print(transactions_with_formatted_date)
 transactions_as_list_of_dicts = list(get_list_dict_transactions(transactions_with_formatted_date))
-investment_savings = get_investment_savings("2019-07", transactions_as_list_of_dicts,10)
+investment_savings = get_investment_savings("2019-07", transactions_as_list_of_dicts,100)
 print(investment_savings)
+print(get_to_json_investment_savings(investment_savings, "2019-07", 100))
 

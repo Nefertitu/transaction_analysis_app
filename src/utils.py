@@ -1,4 +1,5 @@
 import datetime
+from calendar import month
 from datetime import datetime
 from typing import Any, Hashable, List, Dict
 
@@ -88,6 +89,19 @@ def get_list_dict_transactions(transactions: DataFrame) -> List[Dict[str, Any]]:
 
 # transactions_as_list_of_dicts = list(get_list_dict_transactions(df))
 
+
+def get_to_json_investment_savings(amount: float, month: str, limit: int):
+    """
+    Возвращает JSON_ответ для сервиса "Инвесткопилка"
+    :param amount:
+    :param month:
+    :param limit:
+    :return:
+    """
+    result = {"Сумма инвестиционных накоплений": [float(f"{amount}")],
+              "Период для расчета накоплений": [f"{month}"], "Лимит округления": [int(f"{limit}")]}
+
+    return  (pd.DataFrame(result)).to_json(orient="records", indent=4, lines=True, force_ascii=False)
 
 
 path_to_file = path_file("data", "operations_1.xlsx")
