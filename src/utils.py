@@ -1,6 +1,6 @@
 import datetime
 from datetime import datetime
-from typing import Any, Hashable
+from typing import Any, Hashable, List, Dict
 
 import pandas as pd
 from pathlib import Path
@@ -72,6 +72,22 @@ def get_formatted_date(transactions: pd.DataFrame) -> pd.Series | pd.DataFrame:
 
     transactions["Дата операции"] = transactions["Дата операции"].apply(convert_date)
     return transactions
+
+
+def get_list_dict_transactions(transactions: DataFrame) -> List[Dict[str, Any]]:
+    """
+    Переводит формат данных с информацией о транзакциях из DataFrame в список словарей
+    :param transactions:
+    :return:
+    """
+    result = transactions.to_dict(orient="records")
+    for row in result:
+        new_row = {str(key): value for key, value in row.items()}
+        yield new_row
+
+
+# transactions_as_list_of_dicts = list(get_list_dict_transactions(df))
+
 
 
 path_to_file = path_file("data", "operations_1.xlsx")
