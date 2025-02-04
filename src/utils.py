@@ -1,7 +1,7 @@
 import datetime
 from calendar import month
 from datetime import datetime
-from typing import Any, Hashable, List, Dict
+from typing import Any, Hashable, List, Dict, Optional
 
 import pandas as pd
 from pathlib import Path
@@ -10,7 +10,7 @@ from pandas import DataFrame
 
 
 def path_file(my_directory: str, my_filename: str) -> Path:
-    "Получение абсолютного пути к фалу"
+    """Получение абсолютного пути к фалу"""
     ROOT_DIR = Path(__file__).parent.parent
     filepath = ROOT_DIR/my_directory/my_filename
     return filepath
@@ -33,8 +33,9 @@ def get_read_excel(path_to_file: str | Path) -> DataFrame:
         raise ValueError(f"Function {get_read_excel.__name__} error: {str(exc_info)}")
 
     else:
-        values = {"Дата операции": "11.11.1111 00:00:00", "Номер карты": "*0000", "Категория": "Не определена"}
-        return data_transactions.fillna(value=values)
+        values = {"Номер карты": "*0000", "Категория": "Не определена"}
+        data_transactions = data_transactions.fillna(value=values).dropna()
+        return data_transactions
         # return data_transactions.head().to_dict(orient="records")
         # return data_transactions.head().to_json(orient='records', indent=4, lines=True, force_ascii=False)
 
@@ -52,9 +53,10 @@ def get_required_columns(transactions:  DataFrame, names_column: list[str]) -> l
     return data_filter
 
 
-def get_formatted_date(transactions: pd.DataFrame) -> pd.Series | pd.DataFrame:
+def get_formatted_date(transactions: pd.DataFrame, format_date: Optional[str] = None) -> pd.Series | pd.DataFrame:
     """
     Применение функции преобразования формата даты к столбцу с датами
+    :param format_date:
     :param transactions:
     :return:
     """
@@ -62,7 +64,7 @@ def get_formatted_date(transactions: pd.DataFrame) -> pd.Series | pd.DataFrame:
 
     def convert_date(date_str: str) -> str:
         """
-        Преобразование формата даты в данных о финансовых транзакциях
+        Преобразование формата даты в данных о финансовых транзакциях (ГГГГ-ММ-ДД)
         :param date_str:
         :return:
         """
@@ -71,7 +73,21 @@ def get_formatted_date(transactions: pd.DataFrame) -> pd.Series | pd.DataFrame:
         return date_obj.strftime("%Y-%m-%d")
 
 
-    transactions["Дата операции"] = transactions["Дата операции"].apply(convert_date)
+    def convert_date_1(date_str: str) -> str:
+        """
+        Преобразование формата даты в данных о финансовых транзакциях
+        (ГГГГ-ММ-ДД день недели)
+        :param date_str:
+        :return:
+        """
+        date_string, _ = date_str.split(maxsplit=1)
+        date_obj = datetime.strptime(date_string.strip(), '%d.%m.%Y')
+        return date_obj.strftime("%Y-%m-%d %A")
+
+    if format_date is None:
+        transactions["Дата операции"] = transactions["Дата операции"].apply(convert_date)
+        return transactions
+    transactions["Дата операции"] = transactions["Дата операции"].apply(convert_date_1)
     return transactions
 
 
