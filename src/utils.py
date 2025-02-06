@@ -34,7 +34,7 @@ def get_read_excel(path_to_file: str | Path) -> DataFrame:
 
     else:
         values = {"Номер карты": "*0000", "Категория": "Не определена"}
-        data_transactions = data_transactions.fillna(value=values).dropna()
+        data_transactions = data_transactions.fillna(value=values).dropna(subset=["Дата операции"], how='any')
         return data_transactions
         # return data_transactions.head().to_dict(orient="records")
         # return data_transactions.head().to_json(orient='records', indent=4, lines=True, force_ascii=False)
@@ -120,14 +120,14 @@ def get_to_json_investment_savings(amount: float, month: str, limit: int):
     return  (pd.DataFrame(result)).to_json(orient="records", indent=4, lines=True, force_ascii=False)
 
 
-path_to_file = path_file("data", "operations_1.xlsx")
-trans = get_read_excel(path_to_file)
+# path_to_file = path_file("data", "operations_1.xlsx")
+# trans = get_read_excel(path_to_file)
 # print(trans)
-my_columns = ["Дата операции", "Сумма операции"]
+# my_columns = ["Дата операции", "Сумма операции"]
 # my_columns = ["Дата операции"]
-result = get_required_columns(trans, my_columns)
+# result = get_required_columns(trans, my_columns)
 # print(type(result))
 # print(result)
-result_1 = get_formatted_date(result)
+# result_1 = get_formatted_date(result)
 # print(result_1)
 # print(type(result_1))

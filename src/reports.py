@@ -24,6 +24,7 @@ def spending_by_workday(transactions: pd.DataFrame, date: Optional[str] = None) 
     transactions["Дата операции"] = pd.to_datetime(transactions["Дата операции"])
     mask = (transactions["Дата операции"] >= new_date_obj) & (transactions["Дата операции"] <= date_obj)
     result = transactions[mask].copy()
+    print(result)
 
     result["День недели"] = result["Дата операции"].dt.day_name()
     transactions_work_days = result.loc[result["День недели"].isin(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'])]
@@ -40,7 +41,7 @@ def spending_by_workday(transactions: pd.DataFrame, date: Optional[str] = None) 
 #                    "Сумма операции": [160.89, 64.00, 425.15, 780.00, 1000.88]})
 # (print(trans_1))
 trans = get_read_excel(path_to_file=path_file("data", "operations_1.xlsx"))
-print(trans)
+# print(trans)
 
 # my_columns = ["Дата операции", "Сумма операции"]
 # my_columns = ["Дата операции"]
@@ -48,5 +49,5 @@ print(trans)
 # print(type(result))
 # print(result)
 result_1 = get_formatted_date(trans)
-print(result_1)
+# print(result_1)
 print(spending_by_workday(result_1, "2021-01-01"))
