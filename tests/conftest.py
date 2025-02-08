@@ -86,3 +86,27 @@ params = [
     (pd.DataFrame(sample_data_2), pd.DataFrame(sample_data_2).fillna(replace_values))
 ]
 
+@pytest.fixture
+def apilayer_responses() -> list[dict]:
+    """Возвращает словарь с данными о конвертации транзакции
+    (ответ сайта `https://api.apilayer.com`)"""
+    return [
+        {
+  "base": "USD",
+  "date": "2025-02-07",
+  "rates": {
+    "RUB": 96.865166
+  },
+  "success": True,
+  "timestamp": 1738941317
+},
+        {
+  "base": "EUR",
+  "date": "2025-02-07",
+  "rates": {
+    "RUB": 100.503777
+  },
+  "success": True,
+  "timestamp": 1738941545
+}
+    ]

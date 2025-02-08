@@ -33,7 +33,7 @@ def get_read_excel(path_to_file: str | Path) -> DataFrame:
         raise ValueError(f"Function {get_read_excel.__name__} error: {str(exc_info)}")
 
     else:
-        values = {"Номер карты": "*0000", "Категория": "Не определена"}
+        values = {"Номер карты": "*0000", "Категория": data_transactions["Описание"]}
         data_transactions = data_transactions.fillna(value=values).dropna(subset=["Дата операции"], how='any')
         return data_transactions
         # return data_transactions.head().to_dict(orient="records")
@@ -118,6 +118,8 @@ def get_to_json_investment_savings(amount: float, month: str, limit: int):
               "Период для расчета накоплений": [f"{month}"], "Лимит округления": [int(f"{limit}")]}
 
     return  (pd.DataFrame(result)).to_json(orient="records", indent=4, lines=True, force_ascii=False)
+
+
 
 
 # path_to_file = path_file("data", "operations_1.xlsx")
