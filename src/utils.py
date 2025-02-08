@@ -1,7 +1,7 @@
 import datetime
-from calendar import month
+
 from datetime import datetime
-from typing import Any, Hashable, List, Dict, Optional
+from typing import Any, Hashable
 
 import pandas as pd
 from pathlib import Path
@@ -11,19 +11,20 @@ from pandas import DataFrame
 
 def path_file(my_directory: str, my_filename: str) -> Path:
     """Получение абсолютного пути к фалу"""
-    ROOT_DIR = Path(__file__).parent.parent
-    filepath = ROOT_DIR/my_directory/my_filename
+    root_dir = Path(__file__).parent.parent
+    filepath = root_dir/my_directory/my_filename
     return filepath
 
 # print(path_file("src", "utils.py"))
 
 
-def get_read_excel(path_to_file: str | Path) -> DataFrame:
+def get_read_excel(path_to_file: str | Path) -> pd.DataFrame | str:
     """
     Считывание данных о финансовых операциях из файла Excel
     :param path_to_file:
     :return:
     """
+
     try:
         data_transactions = pd.read_excel(path_to_file)
 
@@ -33,18 +34,27 @@ def get_read_excel(path_to_file: str | Path) -> DataFrame:
         raise ValueError(f"Function {get_read_excel.__name__} error: {str(exc_info)}")
 
     else:
-        values = {"Номер карты": "*0000", "Категория": data_transactions["Описание"]}
-        data_transactions = data_transactions.fillna(value=values).dropna(subset=["Дата операции"], how='any')
-        return data_transactions
+        if data_transactions.empty:
+            return "Файл пустой."
+
+        else:
+            values = {"Номер карты": "*0000", "Категория": data_transactions["Описание"]}
+            data_transactions = data_transactions.fillna(value=values).dropna(subset=["Дата операции"], how='any')
+            return data_transactions
+
+
+
+
         # return data_transactions.head().to_dict(orient="records")
         # return data_transactions.head().to_json(orient='records', indent=4, lines=True, force_ascii=False)
 
 
-def get_required_columns(transactions:  DataFrame, names_column: list[str]) -> list[dict[Hashable, Any]] | DataFrame:
+def get_required_columns(transactions:  DataFrame, names_column: list[str]) -> pd.DataFrame:
     """
-    Функция позволяет получить данные из списка словарей с транзакциями в соотвтетсвии
+    Функция позволяет получить данные из списка словарей с транзакциями в соответствии
     с заданными параметрами (названиями столбцов)
     :param transactions:
+    :param names_column:
     :return:
     """
 
@@ -53,11 +63,9 @@ def get_required_columns(transactions:  DataFrame, names_column: list[str]) -> l
     return data_filter
 
 
-def get_formatted_date(transactions: pd.DataFrame, format_date: Optional[str] = None) -> pd.Series | pd.DataFrame:
+def get_formatted_date(transactions: pd.DataFrame) -> pd.Series | pd.DataFrame:
     """
     Применение функции преобразования формата даты к столбцу с датами
-    :param format_date:
-    :param transactions:
     :return:
     """
 
@@ -72,38 +80,20 @@ def get_formatted_date(transactions: pd.DataFrame, format_date: Optional[str] = 
         date_obj = datetime.strptime(date_string.strip(), '%d.%m.%Y')
         return date_obj.strftime("%Y-%m-%d")
 
-
-    def convert_date_1(date_str: str) -> str:
-        """
-        Преобразование формата даты в данных о финансовых транзакциях
-        (ГГГГ-ММ-ДД день недели)
-        :param date_str:
-        :return:
-        """
-        date_string, _ = date_str.split(maxsplit=1)
-        date_obj = datetime.strptime(date_string.strip(), '%d.%m.%Y')
-        return date_obj.strftime("%Y-%m-%d %A")
-
-    if format_date is None:
-        transactions["Дата операции"] = transactions["Дата операции"].apply(convert_date)
-        return transactions
-    transactions["Дата операции"] = transactions["Дата операции"].apply(convert_date_1)
+    transactions["Дата операции"] = transactions["Дата операции"].apply(convert_date)
     return transactions
 
 
-def get_list_dict_transactions(transactions: DataFrame) -> List[Dict[str, Any]]:
+def get_list_dict_transactions(transactions: pd.DataFrame) -> list[dict[Hashable, Any]]:
     """
-    Переводит формат данных с информацией о транзакциях из DataFrame в список словарей
+    Преобразует формат данных с информацией о транзакциях из DataFrame в список словарей
     :param transactions:
     :return:
     """
+
     result = transactions.to_dict(orient="records")
-    for row in result:
-        new_row = {str(key): value for key, value in row.items()}
-        yield new_row
 
-
-# transactions_as_list_of_dicts = list(get_list_dict_transactions(df))
+    return result
 
 
 def get_to_json_investment_savings(amount: float, month: str, limit: int):
@@ -114,6 +104,7 @@ def get_to_json_investment_savings(amount: float, month: str, limit: int):
     :param limit:
     :return:
     """
+
     result = {"Сумма инвестиционных накоплений": [float(f"{amount}")],
               "Период для расчета накоплений": [f"{month}"], "Лимит округления": [int(f"{limit}")]}
 
@@ -122,7 +113,7 @@ def get_to_json_investment_savings(amount: float, month: str, limit: int):
 
 
 
-# path_to_file = path_file("data", "operations_1.xlsx")
+# path_to_file = path_file("data", "oper.xlsx")
 # trans = get_read_excel(path_to_file)
 # print(trans)
 # my_columns = ["Дата операции", "Сумма операции"]

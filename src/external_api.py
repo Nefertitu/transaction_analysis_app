@@ -52,8 +52,9 @@ def get_exchange_rate() -> Any:
 
 def get_stock_prices():
     """
-    Возвращает стоимость акций из списка user_stocks
-    :return: словарь с результатами для каждой акции
+    Возвращает стоимость акций из установленного списка, обращаясь
+    к сайту `https://site.financialmodelingprep.com/`
+    :return:
     """
 
     results = {}
