@@ -94,9 +94,9 @@ def get_event_page(transactions: pd.DataFrame, date: str, time_range: str = "M")
         income_categories_data.append({"category": category, "amount": round(amount, 2)})
 
     # Курсы валют и стоимость акций:
-    currency_rates = get_exchange_rate()
+    currency_rates = get_exchange_rate("./user_settings.json")
 
-    stock_prices = get_stock_prices()
+    stock_prices = get_stock_prices("./user_settings.json")
 
     # Данные для преобразования в JSON-строку:
     data = {

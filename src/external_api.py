@@ -1,24 +1,32 @@
+import json
 import os
+from pathlib import Path
 from typing import Any
 
 import requests
 from dotenv import load_dotenv
+
+from src.utils import path_file
 
 load_dotenv()
 apilayer_key = os.getenv("API_KEY_1")
 alphavantage_key = os.getenv("API_KEY_2")
 
 
-def get_exchange_rate() -> Any:
+def get_exchange_rate(path_to_file: str) -> Any:
     """
     Возвращает курс доллара(USD) и евро(EUR) в рублях по состоянию на текущую дату,
     обращаясь к сайту: 'https://api.apilayer.com/'
     :return:
     """
 
+    with open(path_to_file) as file:
+        user_settings = json.load(file)
+
+    user_currencies = user_settings['user_currencies']
+
     headers = {"apikey": f"{apilayer_key}"}
 
-    user_currencies = ["USD", "EUR"]
     results = {}
 
     for currency in user_currencies:
@@ -48,19 +56,25 @@ def get_exchange_rate() -> Any:
 
 
 # print(get_exchange_rate())
-
-
-def get_stock_prices():
+#
+#
+def get_stock_prices(path_to_file: Path | str) -> Any:
     """
     Возвращает стоимость акций из установленного списка, обращаясь
     к сайту `https://site.financialmodelingprep.com/`
+    :param path_to_file:
     :return:
     """
 
+    with open(path_to_file) as file:
+        user_settings = json.load(file)
+
+    user_stocks = user_settings['user_stocks']
+
     results = {}
     apikey = f"{alphavantage_key}"
-    stocks = ["AAPL", "AMZN", "GOOGL", "MSFT", "TSLA"]
-    for stock in stocks:
+
+    for stock in user_stocks:
         url = f"https://financialmodelingprep.com/api/v3/quote-short/{stock}?apikey={apikey}"
         response = requests.get(url)
 
@@ -72,9 +86,9 @@ def get_stock_prices():
                 results[stock] = {'stock': stock,  "price": price}
 
         else:
-            return (f"Ошибка при получении данных для {stocks}: код статуса {response.status_code}, {response.reason}")
+            return (f"Ошибка при получении данных для {user_stocks}: код статуса {response.status_code}, {response.reason}")
 
     return results
 
 
-# print(get_stock_prices())
+# print(get_stock_prices("../user_settings.json"))

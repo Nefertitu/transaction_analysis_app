@@ -9,6 +9,7 @@ from pathlib import Path
 from pandas import DataFrame
 
 
+
 def path_file(my_directory: str, my_filename: str) -> Path:
     """Получение абсолютного пути к фалу"""
     root_dir = Path(__file__).parent.parent
@@ -96,7 +97,7 @@ def get_list_dict_transactions(transactions: pd.DataFrame) -> list[dict[Hashable
     return result
 
 
-def get_to_json_investment_savings(amount: float, month: str, limit: int):
+def get_to_json_investment_savings(amount: float, month: str, transactions: list[dict[Hashable, Any]], limit: int):
     """
     Возвращает JSON_ответ для сервиса "Инвесткопилка"
     :param amount:
@@ -105,10 +106,12 @@ def get_to_json_investment_savings(amount: float, month: str, limit: int):
     :return:
     """
 
+    # amount = get_investment_bank(month, transactions, limit)
     result = {"Сумма инвестиционных накоплений": [float(f"{amount}")],
-              "Период для расчета накоплений": [f"{month}"], "Лимит округления": [int(f"{limit}")]}
+              "Период для расчета накоплений": [f"{month}"],
+              "Лимит округления": [int(f"{limit}")]}
 
-    return  (pd.DataFrame(result)).to_json(orient="records", indent=4, lines=True, force_ascii=False)
+    return  pd.DataFrame(result).to_json(orient="records", indent=4, lines=True, force_ascii=False)
 
 
 
