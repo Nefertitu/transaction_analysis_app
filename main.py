@@ -1,34 +1,15 @@
-# from src.utils import path_file
-#
-# user_settings_path = path_file("transactions_analysis_app", "user_settings.json")
-# print(user_settings_path)
-import json
 import re
-from _typeshed import SupportsWrite
-from logging import exception
 
-from mypyc.transform.uninit import update_register_assignments_to_set_bitmap
-
+from src.reports import spending_by_workday
 from src.services import get_investment_bank
-from src.utils import get_read_excel, path_file, get_required_columns, get_formatted_date
+from src.utils import get_read_excel, path_file, get_required_columns, get_formatted_date, update_user_settings
 from src.views import get_event_page
 
 
-def update_user_settings(new_currencies: list[str], new_stocks: list[str]) -> str:
-    """
-    Обновляет файл `user_settings.json` пользовательскими настройками
-    :param new_currencies:
-    :param new_stocks:
-    :return:
-    """
-
-    with open('./user_settings.json', 'w') as file:
-        json.dump({'user_currencies': new_currencies, 'user_stocks': new_stocks}, file, indent=4)
-
-    return f"Данные успешно переданы."
-
 user_transactions = get_read_excel(path_to_file=path_file("data", "operations.xlsx"))
 
+
+# Страница "События":
 def main_events() -> str:
     """Функция отвечает за основную логику страницы "События" и связывает
     функциональности страницы между собой"""
@@ -54,31 +35,31 @@ def main_events() -> str:
         print("""\nВведите дату, по состоянию на которую требуются данные, и период, 
     который следует отобразить в отчете""")
 
-        user_date = input("\nДата (в формате ГГГГ-ММ-ДД): ")
+        user_input = input("\nДата (в формате ГГГГ-ММ-ДД): ")
         pattern = r'\b(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|1[0-9]|2[0-9]|3[01])\b'
-        while re.search(pattern, user_date) is None:
-            user_date = input("\nВведите дату в формате ГГГГ-ММ-ДД: ")
+        while re.search(pattern, user_input) is None:
+            user_input = input("\nВведите дату в формате ГГГГ-ММ-ДД: ")
 
-        user_date += user_date
+        user_date += user_input
 
         answer = ["неделя", "месяц", "год", "все данные"]
-        user_range = input("\nОтчетный период ('неделя', 'месяц', 'год', 'все данные'): ")
-        while user_range.lower() not in answer:
-            user_range = input("\nВведите период ('неделя', 'месяц', 'год' или 'все данные'): ")
-        if user_range.lower() == "неделя":
-            time_range = "W"
-            time_range += time_range
-        elif user_range.lower() == "месяц":
-            time_range = "M"
-            time_range += time_range
+        user_input = input("\nОтчетный период ('неделя', 'месяц', 'год', 'все данные'): ")
+        while user_input.lower() not in answer:
+            user_input = input("\nВведите период ('неделя', 'месяц', 'год' или 'все данные'): ")
+        if user_input.lower() == "неделя":
+            user_range = "W"
+            time_range += user_range
+        elif user_input.lower() == "месяц":
+            user_range = "M"
+            time_range += user_range
 
-        elif user_range.lower() == "год":
-            time_range = "Y"
-            time_range += time_range
+        elif user_input.lower() == "год":
+            user_range = "Y"
+            time_range += user_range
 
-        elif user_range.lower() == 'все данные':
-            time_range = "ALL"
-            time_range += time_range
+        elif user_input.lower() == 'все данные':
+            user_range = "ALL"
+            time_range += user_range
 
 
     elif answer_1 == "нет":
@@ -93,12 +74,12 @@ def main_events() -> str:
         answer_currencies = input("\nВведите 'Да' или 'Нет': ")
 
     if answer_currencies.lower() == "да":
-        user_currencies = list(input("\nВведите код валюты для получения текущего курса ('USD', 'EUR' и т.д.): "))
+        user_input = list(input("\nВведите код валюты для получения текущего курса ('USD', 'EUR' и т.д.): "))
         pattern = r"\b[A-Z]{3}\b"
-        while re.search(pattern, (str(user_currencies)).upper()) is None:
-            user_currencies = list(input("\nВведите код валюты ('USD', 'EUR' и т.д.): "))
+        while re.search(pattern, (str(user_input)).upper()) is None:
+            user_input = list(input("\nВведите код валюты ('USD', 'EUR' и т.д.): "))
 
-        user_currencies += user_currencies
+        user_currencies += user_input
 
     elif answer_currencies.lower() == "нет":
         print("")
@@ -109,19 +90,19 @@ def main_events() -> str:
         answer_stocks = input("\nВведите 'Да' или 'Нет': ")
 
     if answer_stocks.lower() == "да":
-        user_stocks = list(input("""\nВведите тикеры(названия) интересующих акций ('AAPL', 'AMZN', 
+        user_input = list(input("""\nВведите тикеры(названия) интересующих акций ('AAPL', 'AMZN', 
     'GOOGL', 'MSFT', 'TSLA' и др.)"""))
         pattern = r"\b[A_Z]{1, 6}\b"
-        while re.search(pattern, (str(user_stocks)).upper()) is None:
-            user_stocks = list(input("""\nВведите тикеры(названия) акций ('AAPL', 'AMZN', 
+        while re.search(pattern, (str(user_input)).upper()) is None:
+            user_input = list(input("""\nВведите тикеры(названия) акций ('AAPL', 'AMZN', 
         'GOOGL', 'MSFT', 'TSLA' и др.)"""))
 
-        user_stocks += user_stocks
+        user_stocks += user_input
 
     if answer_stocks.lower() == "нет":
         print("")
 
-    print(update_user_settings(user_currencies, user_stocks))
+    print(update_user_settings(list(user_currencies), list(user_stocks)))
 
     print("\nРаспечатываю итоговые данные... ")
 
@@ -134,6 +115,7 @@ user_transactions_1 = get_required_columns(user_transactions, ["Дата опе�
 user_transactions_2 = get_formatted_date(user_transactions_1)
 
 
+# "Инвесткопилка":
 def main_investment() -> float | str:
     """Функция для взаимодействия с сервисом 'Инвесткопилка'"""
 
@@ -143,7 +125,6 @@ def main_investment() -> float | str:
 
     # user_date = ""
     # user_limit = ""
-
 
     answer = ["да", "нет"]
     while answer_1.lower() not in answer:
@@ -173,9 +154,47 @@ def main_investment() -> float | str:
 
     return user_data
 
+# Траты в рабочий и выходной день:
+def main_spending_by_workday() -> str:
+    """Функция для взаимодействия с сервисом 'Траты в рабочий/входной день'"""
 
+    print("\nПредтавляем вашему вниманию сервис 'Траты в рабочий/входной день'")
 
+    user_date = ""
 
+    answer_1 = input("""\nЖелаете узнать среднюю сумму трат в рабочий или в выходной
+день? Расчет произвоится за посление 3 месяца от отчетной даты? (Введите: Да/Нет): """)
+
+    answer = ["да", "нет"]
+    while answer_1.lower() not in answer:
+        input("\nВведите 'Да' или 'Нет'.")
+
+    if answer_1.lower() == "нет":
+        return "Завершение работы приложения."
+
+    if answer_1.lower() == "да":
+        answer_date = input("""Желаете установить в качестве отчетной текущую дату? 
+(Введите: Да/Нет)""")
+
+        answer = ["да", "нет"]
+        while answer_date.lower() not in answer:
+            answer_date = input("\nВведите 'Да' или 'Нет'.")
+        if answer_date.lower() == "да":
+            print("\nВыбрана текущая дата.")
+        user_date = None
+
+        if answer_date == "нет":
+            user_input = input("Введите дату отсчета трехмесячного периода в формате 'ГГГГ-ММ-ДД: '")
+            pattern = r'\b(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|1[0-9]|2[0-9]|3[01])\b'
+            while re.search(pattern, user_input) is None:
+                user_input = input("\nВведите дату в формате ГГГГ-ММ-ДД: ")
+            user_date += user_input
+
+    user_data = spending_by_workday(user_transactions_2, user_date)
+    user_data_json = user_data.to_json(orient="records", indent=4, lines=True, force_ascii=False)
+    print("\nРаспечатываю итоговые данные... ")
+
+    return user_data_json
 
 
 

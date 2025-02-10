@@ -1,6 +1,9 @@
 import datetime
+import json
+import logging
 
-from datetime import datetime
+from datetime import datetime, time
+from functools import wraps
 from typing import Any, Hashable
 
 import pandas as pd
@@ -114,6 +117,18 @@ def get_to_json_investment_savings(amount: float, month: str, transactions: list
     return  pd.DataFrame(result).to_json(orient="records", indent=4, lines=True, force_ascii=False)
 
 
+def update_user_settings(new_currencies: list[str], new_stocks: list[str]) -> str:
+    """
+    Обновляет файл `user_settings.json` пользовательскими настройками
+    :param new_currencies:
+    :param new_stocks:
+    :return:
+    """
+
+    with open('./user_settings.json', 'w') as file:
+        json.dump({'user_currencies': new_currencies, 'user_stocks': new_stocks}, file, indent=4)
+
+    return f"Данные успешно переданы."
 
 
 # path_to_file = path_file("data", "oper.xlsx")
