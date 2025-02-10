@@ -1,3 +1,4 @@
+import json
 from typing import Hashable, Any
 
 import pandas as pd
@@ -174,3 +175,27 @@ def financialmodel_responses() -> list[list[dict]]:
 def test_df_to_dict(data_for_test_pd_result):
     df = data_for_test_pd_result.copy()
     return df.to_dict(orient="records")
+
+
+@pytest.fixture
+def json_user_settings() -> str:
+    data =  """
+    {
+  "user_currencies": ["USD", "EUR"],
+  "user_stocks": ["AAPL", "AMZN", "GOOGL", "MSFT", "TSLA"]
+}"""
+    return json.loads(data)
+
+
+@pytest.fixture
+def json_user_settings_1() -> dict:
+    return {
+    "url": "http://example.com/api/exchange-rate"
+}
+
+
+@pytest.fixture
+def json_user_settings_2() -> dict:
+    return {
+"url": "https://site.financialmodelingprep.com/sample/"
+}
