@@ -4,12 +4,12 @@ from functools import wraps
 from typing import Callable, Any
 
 logging.basicConfig(level=logging.INFO,
-                    filename='mylog.txt',
+                    filename='.log//mylog.txt',
                     filemode='a',
                     format='%(levelname)s: %(asctime)s - %(funcName)s() - %(message)s')
 
 
-def get_log_decorator(filename: str = 'report.txt') -> Callable[[Callable], Callable]:
+def get_log_decorator(filename: str = '.log/report.txt') -> Callable[[Callable], Callable]:
     """
     Декоратор для записи отчетов результатов выполнения функций
     :param filename: Имя файла для записи отчетов
