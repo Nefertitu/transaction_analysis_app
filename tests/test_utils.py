@@ -1,14 +1,18 @@
+import json
+
 import pytest
 
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock, mock_open
 
 import pandas as pd
 
-
 from pandas import DataFrame
-from src.utils import get_read_excel, path_file, get_required_columns, get_formatted_date, get_list_dict_transactions
+from src.utils import get_read_excel, path_file, get_required_columns, get_formatted_date, get_list_dict_transactions, \
+    get_to_json_investment_savings, update_user_settings, get_choice_data
 
-from tests.conftest import data_for_test_pd_result, params
+from src.views import get_event_page
+
+from tests.conftest import data_for_test_pd_result, params, transactions_sample_data
 
 
 @patch("pandas.read_excel")
@@ -93,15 +97,65 @@ def test_get_formatted_date(data_for_test_pd_result, data_formatted_date_1):
     pd.testing.assert_frame_equal(result, data_formatted_date_1)
 
 
-def test_get_list_dict_transactions(data_for_test_pd_result, test_df_to_dict):
+def test_get_list_dict_transactions(data_for_test_pd_result, data_for_test_pd):
     """Проверяет, что функция преобразует формат данных с информацией
     о транзакциях из DataFrame в список словарей"""
 
     result = get_list_dict_transactions(data_for_test_pd_result)
-    assert result == test_df_to_dict
+    assert result == data_for_test_pd
 
 
-def test_get_to_json_investment_saving():
+def test_get_to_json_investment_saving(data_to_dict_for_services):
     """Проверяет, что функция возвращает JSON_ответ для сервиса 'Инвесткопилка'"""
 
-    result = test_get_to_json_investment_saving()
+    result = get_to_json_investment_savings("2021-12",  data_to_dict_for_services, 100)
+    assert result == '''
+    {
+        "Сумма инвестиционных накоплений":"75.11",
+        "Период для расчета накоплений":"2021-12",
+        "Лимит округления":100
+    }
+\n'''
+
+
+def test_update_user_settings():
+    """Проверяет, что функция записывает установленные пользователем
+    параметры в файл `user_settings.json` и выводит соответствующее сообщение"""
+
+    expected_currencies = ["USD", "EUR"]
+    expected_stocks = ["AAPL", "AMZN", "GOOGL", "MSFT", "TSLA"]
+
+    result = update_user_settings(expected_currencies, expected_stocks)
+    assert result == "Данные успешно переданы."
+
+    expected_data = {
+        'user_currencies': expected_currencies,
+        'user_stocks': expected_stocks
+    }
+    expected_json = json.dumps(expected_data, indent=4)
+
+    with open('../user_settings.json', 'r') as file:
+        content = file.read()
+
+    assert expected_json == content
+
+
+@pytest.mark.parametrize(
+    "date, time_range, expected_start_date, expected_end_date",
+    [
+        ("2020-02-15", "M", "2020-02-01", "2020-02-15"),  # Месяц: с первого дня месяца до указанной даты
+        ("2020-12-27", "W", '2020-12-21', "2020-12-27"),  # Неделя: с понедельника текущей недели до указанной даты
+        ("2020-06-15", "Y", "2020-01-01", "2020-06-15"),  # Год: с первого января текущего года до указанной даты
+        ("2020-08-08", "ALL", "2020-01-01", "2020-08-08")  # Все: от начала года до указанной даты
+    ]
+)
+def test_get_choice_data(transactions_sample_data, date, time_range, expected_start_date, expected_end_date):
+    """
+    Проверяет, что функция правильно выполняет фильтрацию по дате и периоду
+    :param transactions_sample_data:
+    :return:
+    """
+    filtered_df = get_choice_data(transactions_sample_data, date, time_range)
+    assert len(filtered_df) > 0, "Фильтрация вернула пустой DataFrame"
+    assert filtered_df["Дата операции"].min() == expected_start_date, f"Ожидаемая дата начала {expected_start_date}, полученная {filtered_df['Дата операции'].min()}"
+    assert filtered_df["Дата операции"].max() == expected_end_date, f"Ожидаемая дата окончания {expected_end_date}, полученная {filtered_df['Дата операции'].max()}"

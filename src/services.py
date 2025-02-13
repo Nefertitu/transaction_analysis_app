@@ -37,5 +37,6 @@ def get_investment_bank(month: str, transactions:  list[dict[Hashable, Any]], li
 # print(transactions_as_list_of_dicts)
 # investment_savings = get_investment_bank("2019-07", transactions_as_list_of_dicts,100)
 # print(investment_savings)
-# print(get_to_json_investment_savings(investment_savings, "2019-07", 100))
+# print(get_to_json_investment_savings(investment_savings, "2019-07", transactions_as_list_of_dicts, 100))
+# print(type(get_to_json_investment_savings(investment_savings, "2019-07", transactions_as_list_of_dicts, 100)))
 

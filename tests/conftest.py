@@ -1,17 +1,11 @@
 import json
-from typing import Hashable, Any
+import random
+
 
 import pandas as pd
 import pytest
-from black.lines import Callable
-from pandas import DataFrame, Series
-
-
-@pytest.fixture
-def data_for_test_pd() -> dict:
-    """Возвращает словари с данными транзакций"""
-    return {"Дата операции": ["31.12.2021 16:44:00", "31.12.2021 16:42:04"],
-                   "Сумма операции с округлением": [160.89, 64.00]}
+from datetime import datetime
+from pandas import DataFrame
 
 
 @pytest.fixture
@@ -22,6 +16,12 @@ def data_for_test_pd_result() -> pd.DataFrame:
                    "Описание": ["Кэшбэк", "МТС"]}
 
     return pd.DataFrame(sample_data)
+
+@pytest.fixture
+def data_for_test_pd(data_for_test_pd_result) -> list[dict]:
+    """Возвращает словари с данными транзакций"""
+    df = data_for_test_pd_result.copy()
+    return df.to_dict(orient="records")
 
 
 @pytest.fixture
@@ -78,6 +78,7 @@ replace_values = {"Дата операции": "", "Категория": "Пер
 
 @pytest.fixture
 def data_for_test_pd_date_null():
+
     return pd.DataFrame(sample_data)
 
 @pytest.fixture
@@ -87,14 +88,14 @@ def data_for_test_pd_date_null_2():
 
 @pytest.fixture
 def data_for_test_pd_replace_date(data_for_test_pd_date_null):
-    df = data_for_test_pd_date_null.copy()
-    return df.fillna(value=replace_values).dropna(subset=["Дата операции"], how='any')
+    transactions_sample_data = data_for_test_pd_date_null.copy()
+    return transactions_sample_data.fillna(value=replace_values).dropna(subset=["Дата операции"], how='any')
 
 
 @pytest.fixture
 def data_for_test_pd_replace_date_2(data_for_test_pd_date_null_2):
-    df = data_for_test_pd_date_null_2.copy()
-    return df.fillna(value=replace_values).dropna(subset=["Дата операции"], how='any')
+    transactions_sample_data = data_for_test_pd_date_null_2.copy()
+    return transactions_sample_data.fillna(value=replace_values).dropna(subset=["Дата операции"], how='any')
 
 
 params = [
@@ -172,9 +173,9 @@ def financialmodel_responses() -> list[list[dict]]:
 
 
 @pytest.fixture
-def test_df_to_dict(data_for_test_pd_result):
-    df = data_for_test_pd_result.copy()
-    return df.to_dict(orient="records")
+def test_transactions_sample_data_to_dict(data_for_test_pd_result):
+    transactions_sample_data = data_for_test_pd_result.copy()
+    return transactions_sample_data.to_dict(orient="records")
 
 
 @pytest.fixture
@@ -199,3 +200,74 @@ def json_user_settings_2() -> dict:
     return {
 "url": "https://site.financialmodelingprep.com/sample/"
 }
+
+
+@pytest.fixture
+def data_to_dict_for_services(data_for_test_pd_2):
+    transactions_sample_data = data_for_test_pd_2.copy()
+    return transactions_sample_data.to_dict(orient="records")
+
+
+@pytest.fixture(scope="module")
+def transactions_sample_data():
+    """Фикстура для создания тестового датафрейма"""
+    index = pd.date_range(start='2020-01-01', end='2020-12-31', freq='D')
+    transactions_sample_data = pd.DataFrame(index=index)
+
+    categories = ["Перевод с карты", "Переводы", "Перевод средств с брокерского счета", "Зарплата", "Пополнения",
+                  "Бонусы", "Наличные", "Супермаркеты", "Фастфуд", "Топливо", "Развлечения", "Медицина", "Госуслуги",
+                  "Дом и ремонт"]
+    amount = list(range(0, 5000))
+
+    new_categories = []
+    amount_list = []
+
+    for _ in range(366):
+        random_category = random.choice(categories)
+        random_number = random.choice(amount)
+        new_categories.append(random_category)
+        amount_list.append(float(random_number))
+
+    transactions_sample_data["Категория"] = new_categories
+    transactions_sample_data["Сумма операции"] = amount_list
+
+    transactions_sample_data.reset_index(inplace=True)
+    transactions_sample_data.rename(columns={"index": "Дата операции"}, inplace=True)
+
+    return transactions_sample_data
+
+
+@pytest.fixture
+def transactions_random_data(transactions_sample_data):
+    df_sample_data = transactions_sample_data.copy()
+    return df_sample_data
+
+
+@pytest.fixture
+def df_sample_data():
+    """Генерация DataFrame с транзакциями"""
+    sample_data = {
+        'Дата операции': ['2020-01-25', '2020-02-10', '2020-03-05', '2020-04-20'],  # Добавлена запись за январь
+        'Сумма операции': [50, 100, 200, 300]
+    }
+    df = pd.DataFrame(sample_data)
+    df["Дата операции"] = pd.to_datetime(df["Дата операции"])
+    return df
+
+
+@pytest.fixture
+def get_choice_data_month(transactions_sample_data, date_str, time_range, ):
+    date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+    if time_range == "M":
+        first_day_of_month = date_obj.replace(day=1)
+        last_day_of_month = first_day_of_month + pd.offsets.MonthEnd(0)
+        mask = (transactions_sample_data["Дата операции"] >= first_day_of_month) & (transactions_sample_data["Дата операции"] <= last_day_of_month)
+        return transactions_sample_data[mask].copy()
+    else:
+        raise ValueError(f"Неподдерживаемый временной диапазон: {time_range}")
+
+
+
+
+
+

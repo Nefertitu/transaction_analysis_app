@@ -2,9 +2,9 @@ import datetime
 import json
 import logging
 
-from datetime import datetime, time
+from datetime import datetime, timedelta
 from functools import wraps
-from typing import Any, Hashable
+from typing import Any, Hashable, Union
 
 import pandas as pd
 from pathlib import Path
@@ -100,17 +100,26 @@ def get_list_dict_transactions(transactions: pd.DataFrame) -> list[dict[Hashable
     return result
 
 
-def get_to_json_investment_savings(amount: float, month: str, transactions: list[dict[Hashable, Any]], limit: int):
+def get_to_json_investment_savings(month: str, transactions: list[dict[Hashable, Any]], limit: int) -> str:
     """
     Возвращает JSON_ответ для сервиса "Инвесткопилка"
-    :param amount:
     :param month:
     :param limit:
     :return:
     """
 
-    # amount = get_investment_bank(month, transactions, limit)
-    result = {"Сумма инвестиционных накоплений": [float(f"{amount}")],
+    invest_savings = []
+    for transaction in transactions:
+        amount = transaction["Сумма операции"]
+
+        if month in transaction["Дата операции"]:
+            accumulation = round((limit - (abs(amount) % limit)), 2)
+            invest_savings.append(accumulation)
+
+        else:
+            continue
+    total_amount = round(sum(invest_savings), 2)
+    result = {"Сумма инвестиционных накоплений": [f"{total_amount}"],
               "Период для расчета накоплений": [f"{month}"],
               "Лимит округления": [int(f"{limit}")]}
 
@@ -125,20 +134,63 @@ def update_user_settings(new_currencies: list[str], new_stocks: list[str]) -> st
     :return:
     """
 
-    with open('./user_settings.json', 'w') as file:
+    with open('../user_settings.json', 'w') as file:
         json.dump({'user_currencies': new_currencies, 'user_stocks': new_stocks}, file, indent=4)
-
     return f"Данные успешно переданы."
 
 
-# path_to_file = path_file("data", "oper.xlsx")
+def get_choice_data(transactions: pd.DataFrame, date: str, time_range: str) -> pd.Series | Union[pd.DataFrame, None]:
+
+    date_obj = datetime.strptime(date, '%Y-%m-%d')
+    transactions["Дата операции"] = pd.to_datetime(transactions["Дата операции"])
+
+    if time_range == "M":
+        first_day_of_month = date_obj.replace(day=1)
+        mask = (transactions["Дата операции"] >= first_day_of_month) & (transactions["Дата операции"] <= date_obj)
+        transactions['Дата операции'] = transactions['Дата операции'].dt.strftime('%Y-%m-%d')
+        return transactions[mask].copy()
+
+    elif time_range == "W":
+
+        diff = date_obj.weekday()
+        start_of_week = date_obj - timedelta(days=diff)
+        mask = (transactions["Дата операции"] >= start_of_week) & (transactions["Дата операции"] <= date_obj)
+        transactions['Дата операции'] = transactions['Дата операции'].dt.strftime('%Y-%m-%d')
+        return transactions[mask].copy()
+
+    elif time_range == "Y":
+
+        start_of_year = date_obj.replace(month=1, day=1)
+        mask = (transactions["Дата операции"] >= start_of_year) & (transactions["Дата операции"] <= date_obj)
+        transactions['Дата операции'] = transactions['Дата операции'].dt.strftime('%Y-%m-%d')
+        return transactions[mask].copy()
+
+
+    elif time_range == "ALL":
+
+        mask = (transactions["Дата операции"] <= date_obj)
+        transactions['Дата операции'] = transactions['Дата операции'].dt.strftime('%Y-%m-%d')
+        return transactions[mask].copy()
+    
+    else:
+        raise ValueError(f"Неправильный параметр time_range: {time_range}")
+
+
+
+# path_to_file = path_file("data", "./operations.xlsx")
 # trans = get_read_excel(path_to_file)
-# print(trans)
+# # print(trans)
 # my_columns = ["Дата операции", "Сумма операции"]
-# my_columns = ["Дата операции"]
+# # my_columns = ["Дата операции"]
 # result = get_required_columns(trans, my_columns)
-# print(type(result))
-# print(result)
+# # print(type(result))
+# # print(result)
 # result_1 = get_formatted_date(result)
-# print(result_1)
-# print(type(result_1))
+# # print(result_1)
+# # print(type(result_1))
+#
+# # print(update_user_settings(["EUR", "USD"], ["GOOGL", "TSLA"]))
+#
+# filter_date = get_choice_data(result_1, "2020-02-15", "W")
+# print(filter_date)
+# print(type(filter_date))
