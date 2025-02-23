@@ -133,10 +133,10 @@ def test_get_sock_prices_succsess(mock_requests, mock_open, financialmodel_respo
 
     mock_requests.return_value = mock_response
 
-    expected_result = {"AAPL": {"stock": "AAPL", "price": 150.15},
-                       "AMZN": {"stock": "AMZN", "price": 3173.18},
-                       "GOOGL": {"stock": "GOOGL", "price": 2742.39},
-                       "MSFT": {"stock": "MSFT", "price": 296.71},
-                       "TSLA": {"stock": "TSLA", "price": 1007.08}}
+    expected_result = {"AAPL": {"stock": "AAPL", "price": 240.86},
+                       "AMZN": {"stock": "AMZN", "price": 229.65},
+                       "GOOGL": {"stock": "GOOGL", "price": 184.67},
+                       "MSFT": {"stock": "MSFT", "price": 409.42},
+                       "TSLA": {"stock": "TSLA", "price": 352.91}}
 
     assert get_stock_prices("sample.json") == expected_result

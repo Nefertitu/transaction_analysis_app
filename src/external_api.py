@@ -13,7 +13,7 @@ apilayer_key = os.getenv("API_KEY_1")
 alphavantage_key = os.getenv("API_KEY_2")
 
 
-def get_exchange_rate(path_to_file: str) -> Any:
+def get_exchange_rate(path_to_file: str) -> dict | str:
     """
     Возвращает курс доллара(USD) и евро(EUR) в рублях по состоянию на текущую дату,
     обращаясь к сайту: 'https://api.apilayer.com/'
@@ -55,10 +55,10 @@ def get_exchange_rate(path_to_file: str) -> Any:
     return results
 
 
-# print(get_exchange_rate())
+# print(get_exchange_rate("../user_settings.json"))
 #
 #
-def get_stock_prices(path_to_file: Path | str) -> Any:
+def get_stock_prices(path_to_file: Path | str) -> dict | str:
     """
     Возвращает стоимость акций из установленного списка, обращаясь
     к сайту `https://site.financialmodelingprep.com/`

@@ -141,6 +141,9 @@ def update_user_settings(new_currencies: list[str], new_stocks: list[str]) -> st
 
 def get_choice_data(transactions: pd.DataFrame, date: str, time_range: str) -> pd.Series | Union[pd.DataFrame, None]:
 
+    if not isinstance(transactions, pd.DataFrame):
+        raise ValueError("Ожидается объект типа DataFrame")
+
     date_obj = datetime.strptime(date, '%Y-%m-%d')
     transactions["Дата операции"] = pd.to_datetime(transactions["Дата операции"])
 

@@ -6,9 +6,10 @@ from pandas import DataFrame
 
 from src.external_api import get_exchange_rate, get_stock_prices
 from src.utils import get_read_excel, path_file, get_formatted_date, get_required_columns, get_choice_data
+from tests.conftest import transactions_random_data, transactions_sample_data
 
 
-def get_event_page(transactions: pd.DataFrame, date: str, time_range: str = "M") -> DataFrame | str:
+def get_event_page(transactions: pd.DataFrame, date: str, time_range: str = "M") -> dict | str:
     """
     Функция реализует функционал веб-страницы 'События', включающий предоставление
     следующих данных: расходы, поступления, курсы валют, стоимость акций из S&P 500
@@ -66,9 +67,8 @@ def get_event_page(transactions: pd.DataFrame, date: str, time_range: str = "M")
         income_categories_data.append({"category": category, "amount": round(amount, 2)})
 
     # Курсы валют и стоимость акций:
-    # currency_rates = get_exchange_rate("../user_settings.json")
-
-    # stock_prices = get_stock_prices("../user_settings.json")
+    currency_rates = get_exchange_rate("../user_settings.json")
+    stock_prices = get_stock_prices("../user_settings.json")
 
     # Данные для преобразования в JSON-строку:
     data = {
@@ -93,21 +93,17 @@ def get_event_page(transactions: pd.DataFrame, date: str, time_range: str = "M")
             "main":
                 income_categories_data,
         },
-        # "currency_rates": [
-        #     {
-        #         currency_rates["USD"]
-        #     },
-        #     {
-        #         currency_rates["EUR"]
-        #     }
-        # ],
-        # "stock_prises": [
-        #         stock_prices["AAPL"],
-        #         stock_prices["AMZN"],
-        #         stock_prices["GOOGL"],
-        #         stock_prices["MSFT"],
-        #         stock_prices["TSLA"]
-        # ]
+        "currency_rates": [
+            currency_rates["USD"],
+            currency_rates["EUR"],
+        ],
+        "stock_prices": [
+                stock_prices["AAPL"],
+                stock_prices["AMZN"],
+                stock_prices["GOOGL"],
+                stock_prices["MSFT"],
+                stock_prices["TSLA"]
+        ]
     }
 
     # return json.dumps(data, ensure_ascii=False, indent=2)
@@ -118,21 +114,25 @@ def get_event_page(transactions: pd.DataFrame, date: str, time_range: str = "M")
 #                    "Сумма операции": [160.89, 64.00, 425.15, 780.00, 1000.88]
 # }
 # df = pd.DataFrame(data)
-
-trans = get_read_excel(path_to_file=path_file("data", "operations.xlsx"))
+#
+# trans = get_read_excel(path_to_file=path_file("data", "operations.xlsx"))
 # # print(trans)
 # # print(trans.info())
-# # print(trans.isnull().sum())
-#
-my_columns = ["Дата операции", "Сумма операции", "Категория"]
-# # my_columns = ["Дата операции"]
-result = get_required_columns(trans, my_columns)
-# # print(type(result))
-# # print(result)
-result_1 = get_formatted_date(result)
+# # print(trans.dtypes)
+# # # # print(trans.isnull().sum())
+# # #
+# my_columns = ["Дата операции", "Сумма операции", "Категория"]
+# # # # my_columns = ["Дата операции"]
+# result = get_required_columns(trans, my_columns)
+# # # # print(type(result))
+# # # # print(result)
+# result_1 = get_formatted_date(result)
 # # print(result_1)
-result = get_event_page(result_1, "2021-12-08", "W")
+# filter_date = get_choice_data(result, "2020-06-16", "W")
+# # print(filter_date)
+# result = get_event_page(filter_date, "2020-06-16", "W")
 # print(result)
+# #
 # print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
