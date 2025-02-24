@@ -10,7 +10,7 @@ from src.services import get_investment_bank
         (100, 299.28),
     ]
 )
-def test_get_investment_bank(limit, expected_result, dict_sample_data):
+def test_get_investment_bank(limit: int, expected_result: float, dict_sample_data: list[dict]) -> None:
     """
     Проверяет, что функция корректно производит расчет суммы, которую
     удалось бы отложить при использовании сервиса "Инвесткопилка",
