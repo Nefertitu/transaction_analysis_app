@@ -2,7 +2,8 @@ import re
 
 from src.reports import spending_by_workday
 from src.services import get_investment_bank
-from src.utils import get_read_excel, path_file, get_required_columns, get_formatted_date, update_user_settings
+from src.utils import get_read_excel, path_file, get_required_columns, get_formatted_date, update_user_settings, \
+    get_to_json_views
 from src.views import get_event_page
 
 
@@ -20,10 +21,11 @@ def main_events() -> str:
 
     user_date = ""
     time_range = ""
-    user_currencies = ""
-    user_stocks = ""
+    user_currencies = []
+    user_stocks = []
     user_date = ""
     user_range = ""
+    user_data_json = ""
 
     answer_1 = input("\nЖелаете получить информацию о доходах/расходах? (Да/Нет): ")
     answer = ["да", "нет"]
@@ -61,54 +63,57 @@ def main_events() -> str:
             user_range = "ALL"
             time_range += user_range
 
+        # user_transactions = get_read_excel(path_to_file=path_file("data", "operations.xlsx"))
 
-    elif answer_1 == "нет":
-        print("")
+        # вывод информации о курах валют и стоимости акций:
+        answer_currencies = input("\nЖелаете получить информацию о текущем курсе валют? (Да/Нет): ")
+        answer = ["да", "нет"]
+        while answer_currencies.lower() not in answer:
+            answer_currencies = input("\nВведите 'Да' или 'Нет': ")
 
-    # user_transactions = get_read_excel(path_to_file=path_file("data", "operations.xlsx"))
+        if answer_currencies.lower() == "да":
+            user_input = input("\nВведите код валюты для получения текущего курса (USD, EUR и т.д.): ")
+            pattern = r"\b[A-Z]{3}\b(?:\s*,\s*|\s+)"
+            while re.search(pattern, (str(user_input)).upper()) is None:
+                user_input = input("\nВведите код валюты (USD, EUR и т.д.): ")
 
-    # вывод информации о курах валют и стоимости акций:
-    answer_currencies = input("\nЖелаете получить информацию о текущем курсе валют? (Да/Нет): ")
-    answer = ["да", "нет"]
-    while answer_currencies.lower() not in answer:
-        answer_currencies = input("\nВведите 'Да' или 'Нет': ")
+            user_currencies += [currency.strip() for currency in user_input.split(',')]
 
-    if answer_currencies.lower() == "да":
-        user_input = list(input("\nВведите код валюты для получения текущего курса ('USD', 'EUR' и т.д.): "))
-        pattern = r"\b[A-Z]{3}\b"
-        while re.search(pattern, (str(user_input)).upper()) is None:
-            user_input = list(input("\nВведите код валюты ('USD', 'EUR' и т.д.): "))
+        elif answer_currencies.lower() == "нет":
+            print("")
 
-        user_currencies += user_input
+        answer_stocks = input("Желаете получить информацию о текущей стоимости акций? (Да/Нет): ")
+        answer = ["да", "нет"]
+        while answer_stocks.lower() not in answer:
+            answer_stocks = input("\nВведите 'Да' или 'Нет': ")
 
-    elif answer_currencies.lower() == "нет":
-        print("")
+        if answer_stocks.lower() == "да":
+            user_input = input("""\nВведите тикеры(названия) интересующих акций (AAPL, AMZN, 
+        GOOGL, MSFT, TSLA и др.): """)
+            pattern = r"\b[A_Z]{1, 6}\b(?:\s*,\s*|\s+)"
+            while re.findall(pattern, (str(user_input)).upper()) is None:
+                user_input = input("""\nВведите тикеры(названия) акций (AAPL, AMZN, 
+            GOOGL, MSFT, TSLA и др.): """)
 
-    answer_stocks = input("\nЖелаете получить информацию о текущей стоимости акций? (Да/Нет): ")
-    answer = ["да", "нет"]
-    while answer_stocks.lower() not in answer:
-        answer_stocks = input("\nВведите 'Да' или 'Нет': ")
+            user_stocks += [ticker.strip() for ticker in user_input.split(',')]
+            print(user_stocks)
 
-    if answer_stocks.lower() == "да":
-        user_input = list(input("""\nВведите тикеры(названия) интересующих акций ('AAPL', 'AMZN', 
-    'GOOGL', 'MSFT', 'TSLA' и др.)"""))
-        pattern = r"\b[A_Z]{1, 6}\b"
-        while re.search(pattern, (str(user_input)).upper()) is None:
-            user_input = list(input("""\nВведите тикеры(названия) акций ('AAPL', 'AMZN', 
-        'GOOGL', 'MSFT', 'TSLA' и др.)"""))
+        if answer_stocks.lower() == "нет":
+            print("")
 
-        user_stocks += user_input
+        print("\nРаспечатываю итоговые данные... ")
 
-    if answer_stocks.lower() == "нет":
-        print("")
+        user_settings_json = update_user_settings(user_currencies, user_stocks)
+        print(user_settings_json)
+        # user_data_formatted_date = get_formatted_date(user_transactions)
+        # user_data_dict = get_event_page(user_data_formatted_date, user_date, user_range)
+        # print(user_data_dict)
+        # user_data_json += get_to_json_views(user_data_dict)
 
-    print(update_user_settings(list(user_currencies), list(user_stocks)))
+    elif answer_1.lower() == "нет":
+        user_data_json += "Завершение программы"
 
-    print("\nРаспечатываю итоговые данные... ")
-
-    user_data = get_event_page(user_transactions, user_date, user_range)
-
-    return user_data
+    return user_data_json
 
 
 user_transactions_1 = get_required_columns(user_transactions, ["Дата операции", "Сумма операции"])
@@ -195,6 +200,8 @@ def main_spending_by_workday() -> str:
     print("\nРаспечатываю итоговые данные... ")
 
     return user_data_json
+
+print(main_events())
 
 
 

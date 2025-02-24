@@ -67,44 +67,121 @@ def get_event_page(transactions: pd.DataFrame, date: str, time_range: str = "M")
         income_categories_data.append({"category": category, "amount": round(amount, 2)})
 
     # Курсы валют и стоимость акций:
-    currency_rates = get_exchange_rate("../user_settings.json")
-    stock_prices = get_stock_prices("../user_settings.json")
+    currency_rates = list((get_exchange_rate("../user_settings.json")).values())
+    stock_prices = list((get_stock_prices("../user_settings.json")).values())
+    if currency_rates and stock_prices:
 
     # Данные для преобразования в JSON-строку:
-    data = {
-        "expenses": {
-            "total_amount": expenses_amount,
-            "main": [
-                    categories_expenses_data,
+        data = {
+            "expenses": {
+                "total_amount": expenses_amount,
+                "main": [
+                        categories_expenses_data,
+                ],
+                "transfers_and_cash": [
+                    {
+                        "category": "Наличные",
+                        "amount": cash_amount,
+                    },
+                    {
+                        "category": "Переводы",
+                        "amount": transfers_amount,
+                    }
+                ]
+            },
+            "income": {
+                "total_amount": income_amount,
+                "main":
+                    income_categories_data,
+            },
+            "currency_rates": [
+                currency_rates
             ],
-            "transfers_and_cash": [
-                {
-                    "category": "Наличные",
-                    "amount": cash_amount,
-                },
-                {
-                    "category": "Переводы",
-                    "amount": transfers_amount,
-                }
+            "stock_prices": [
+                    stock_prices
             ]
-        },
-        "income": {
-            "total_amount": income_amount,
-            "main":
-                income_categories_data,
-        },
-        "currency_rates": [
-            currency_rates["USD"],
-            currency_rates["EUR"],
-        ],
-        "stock_prices": [
-                stock_prices["AAPL"],
-                stock_prices["AMZN"],
-                stock_prices["GOOGL"],
-                stock_prices["MSFT"],
-                stock_prices["TSLA"]
-        ]
-    }
+        }
+
+    if currency_rates and not stock_prices:
+        data = {
+            "expenses": {
+                "total_amount": expenses_amount,
+                "main": [
+                    categories_expenses_data,
+                ],
+                "transfers_and_cash": [
+                    {
+                        "category": "Наличные",
+                        "amount": cash_amount,
+                    },
+                    {
+                        "category": "Переводы",
+                        "amount": transfers_amount,
+                    }
+                ]
+            },
+            "income": {
+                "total_amount": income_amount,
+                "main":
+                    income_categories_data,
+            },
+            "currency_rates": [
+                currency_rates
+            ],
+        }
+
+    if stock_prices and not currency_rates:
+        data = {
+            "expenses": {
+                "total_amount": expenses_amount,
+                "main": [
+                    list(categories_expenses_data),
+                ],
+                "transfers_and_cash": [
+                    {
+                        "category": "Наличные",
+                        "amount": cash_amount,
+                    },
+                    {
+                        "category": "Переводы",
+                        "amount": transfers_amount,
+                    }
+                ]
+            },
+            "income": {
+                "total_amount": income_amount,
+                "main":
+                    income_categories_data,
+            },
+            "stock_prices": [
+                stock_prices
+            ]
+        }
+
+    else:
+        data = {
+            "expenses": {
+                "total_amount": expenses_amount,
+                "main": [
+                    categories_expenses_data,
+                ],
+                "transfers_and_cash": [
+                    {
+                        "category": "Наличные",
+                        "amount": cash_amount,
+                    },
+                    {
+                        "category": "Переводы",
+                        "amount": transfers_amount,
+                    }
+                ]
+            },
+            "income": {
+                "total_amount": income_amount,
+                "main":
+                    income_categories_data,
+            },
+        }
 
     # return json.dumps(data, ensure_ascii=False, indent=2)
     return data

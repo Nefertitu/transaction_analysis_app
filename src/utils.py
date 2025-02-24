@@ -179,17 +179,33 @@ def get_to_json_investment_savings(month: str, transactions: list[dict[Hashable,
     return  pd.DataFrame(result).to_json(orient="records", indent=4, lines=True, force_ascii=False)
 
 
-def update_user_settings(new_currencies: list[str], new_stocks: list[str]) -> str:
+def update_user_settings(new_currencies: list[str] = None, new_stocks: list[str] = None) -> str:
     """
     Обновляет файл `user_settings.json` пользовательскими настройками
     :param new_currencies:
     :param new_stocks:
     :return:
     """
+    if new_currencies and new_stocks:
+        with open('./user_settings.json', 'w') as file:
+            json.dump({'user_currencies': new_currencies, 'user_stocks': new_stocks}, file, indent=4)
+        return f"\n\nДанные успешно переданы."
+    elif new_currencies:
+        with open('./user_settings.json', 'w') as file:
+            json.dump({'user_currencies': new_currencies}, file, indent=4)
+        return f"\n\nДанные успешно переданы."
+    elif new_stocks:
+        with open('./user_settings.json', 'w') as file:
+            json.dump({'user_stocks': new_stocks}, file, indent=4)
+        return f"\n\nДанные успешно переданы."
+    else:
+        with open('./user_settings.json', 'w') as file:
+            file.write("")
+        return f"\n\nНет данных."
 
-    with open('../user_settings.json', 'a') as file:
-        json.dump({'user_currencies': new_currencies, 'user_stocks': new_stocks}, file, indent=4)
-    return f"Данные успешно переданы."
+# new_currencies = []
+# new_stocks = ['AAPL', 'AMZN']
+# print(update_user_settings(new_currencies, new_stocks))
 
 
 def get_choice_data(transactions: pd.DataFrame, date: str, time_range: str) -> pd.Series | Union[pd.DataFrame, None]:
@@ -230,6 +246,21 @@ def get_choice_data(transactions: pd.DataFrame, date: str, time_range: str) -> p
     
     else:
         raise ValueError(f"Неправильный параметр time_range: {time_range}")
+
+
+def get_to_json_views(data_transactions: dict) -> str:
+    """
+    Преобразует данные страницы "События" в JSON формат
+    :param data_transactions:
+    :return:
+    """
+
+    result = json.dumps(data_transactions, ensure_ascii=False, indent=2)
+
+    return result
+
+# data = {'expenses': {'total_amount': 2681.82, 'main': [[{'category': 'Другое', 'amount': 2127.32}, {'category': 'Топливо', 'amount': 221.0}, {'category': 'Красота', 'amount': 179.5}, {'category': 'Остальное', 'amount': 154.0}]], 'transfers_and_cash': [{'category': 'Наличные', 'amount': 0.0}, {'category': 'Переводы', 'amount': 0.0}]}, 'income': {'total_amount': 500.0, 'main': [{'category': 'Бонусы', 'amount': 500.0}]}, 'stock_prices': [([{'stock': 'AAPL', 'price': 247.9}, {'stock': 'AMZN', 'price': 214.45}])]}
+# print(get_to_json_views(data))
 
 
 # path_to_file = path_file("data", "operations.xlsx")
