@@ -4,13 +4,12 @@ import logging
 
 from datetime import datetime, timedelta
 from functools import wraps
-from typing import Any, Hashable, Union
+from typing import Any, Callable,Hashable, Union
 
 import pandas as pd
 from pathlib import Path
 
 from pandas import DataFrame
-
 
 
 def path_file(my_directory: str, my_filename: str) -> Path:
@@ -20,6 +19,62 @@ def path_file(my_directory: str, my_filename: str) -> Path:
     return filepath
 
 # print(path_file("src", "utils.py"))
+
+
+def configure_logging(log_path: Path):
+    """Настраивает логирование с указанной кодировкой."""
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+
+    handler = logging.FileHandler(log_path, mode='w', encoding='utf-8')
+    handler.setFormatter(logging.Formatter('%(levelname)s: %(asctime)s - %(funcName)s() - %(message)s'))
+    logger.addHandler(handler)
+
+
+def get_decorator(filename: str = None) -> Callable[[Callable], Callable]:
+    """
+    Декоратор для записи отчетов результатов выполнения функций
+    :param filename: Имя файла для записи отчетов
+    :return: Декорированная функция
+    """
+
+    if not filename:
+        filename = f'{path_file("log", "report.log")}'
+    filename = f'{path_file("log", filename)}'
+
+    def decorator(function: Callable) -> Callable:
+        @wraps(function)
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            # logging.info(f"Starting {function.__name__} with arguments: {args}, {kwargs}")
+
+            try:
+                start_time = datetime.now()
+                result = function(*args, **kwargs)
+                end_time = datetime.now()
+
+                with open(filename, 'w', encoding="utf-8") as file:
+                    file.write(
+                        f"Function_name: {function.__name__}.\n"
+                        f"Function call time: {start_time}.\n"
+                        f"Execution time: {(end_time - start_time).total_seconds():.7f}\n\n"
+                        f"Result = {result}.\n"
+                    )
+
+                return result
+
+            except Exception as exc_info:
+
+                with open(filename, 'w') as file:
+                    file.write(
+                        f"{function.__name__} error: {type(exc_info).__name__}: {str(exc_info)}.\n"
+                        f"Inputs: {args}, {kwargs}\n\n"
+                    )
+
+                return (f"{function.__name__} failed with exception: {exc_info}. Arguments: {args}, {kwargs}.")
+
+        return wrapper
+
+    return decorator
 
 
 def get_read_excel(path_to_file: str | Path) -> pd.DataFrame | str:
@@ -45,8 +100,6 @@ def get_read_excel(path_to_file: str | Path) -> pd.DataFrame | str:
             values = {"Номер карты": "*0000", "Категория": data_transactions["Описание"]}
             data_transactions = data_transactions.fillna(value=values).dropna(subset=["Дата операции"], how='any')
             return data_transactions
-
-
 
 
         # return data_transactions.head().to_dict(orient="records")
@@ -134,7 +187,7 @@ def update_user_settings(new_currencies: list[str], new_stocks: list[str]) -> st
     :return:
     """
 
-    with open('../user_settings.json', 'w') as file:
+    with open('../user_settings.json', 'a') as file:
         json.dump({'user_currencies': new_currencies, 'user_stocks': new_stocks}, file, indent=4)
     return f"Данные успешно переданы."
 
@@ -179,10 +232,9 @@ def get_choice_data(transactions: pd.DataFrame, date: str, time_range: str) -> p
         raise ValueError(f"Неправильный параметр time_range: {time_range}")
 
 
-
-# path_to_file = path_file("data", "./operations.xlsx")
+# path_to_file = path_file("data", "operations.xlsx")
 # trans = get_read_excel(path_to_file)
-# # print(trans)
+# print(trans)
 # my_columns = ["Дата операции", "Сумма операции"]
 # # my_columns = ["Дата операции"]
 # result = get_required_columns(trans, my_columns)

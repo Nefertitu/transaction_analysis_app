@@ -258,6 +258,7 @@ def df_sample_data():
     }
     df = pd.DataFrame(sample_data)
     df["Дата операции"] = pd.to_datetime(df["Дата операции"])
+
     return df
 
 
@@ -270,6 +271,19 @@ def dict_sample_data() -> list[dict]:
         {'Дата операции': '2020-03-05', 'Сумма операции': -2100.08},
         {'Дата операции': '2020-03-20', 'Сумма операции': -300.49}
     ]
+
+@pytest.fixture
+def sample_data_for_reports() -> pd.DataFrame:
+    """Генерация DataFrame с транзакциями"""
+    sample_data = {
+        'Дата операции': ['2020-01-10', '2020-01-25', '2020-03-05', '2020-04-20'],  # Добавлена запись за январь
+        'Сумма операции': [5000.25, 100.15, 2080.95, 3011.10]
+    }
+    df = pd.DataFrame(sample_data)
+    # df["Дата операции"] = pd.to_datetime(df["Дата операции"])
+
+    return df
+
 
 
 #
