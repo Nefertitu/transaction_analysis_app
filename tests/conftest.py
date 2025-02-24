@@ -260,6 +260,18 @@ def df_sample_data():
     df["Дата операции"] = pd.to_datetime(df["Дата операции"])
     return df
 
+
+@pytest.fixture
+def dict_sample_data() -> list[dict]:
+    """Получение списка словарей с транзакциями"""
+    return [
+        {'Дата операции': '2020-01-25', 'Сумма операции': -50.25},
+        {'Дата операции': '2020-03-04', 'Сумма операции': -100.15},
+        {'Дата операции': '2020-03-05', 'Сумма операции': -2100.08},
+        {'Дата операции': '2020-03-20', 'Сумма операции': -300.49}
+    ]
+
+
 #
 # @pytest.fixture
 # def get_choice_data_month(transactions_sample_data, date_str, time_range, ):
