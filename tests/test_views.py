@@ -74,7 +74,6 @@ def test_get_event_page_success(
         "EUR": {"currency": "EUR", "rate": 96.04}
     }
 
-    # Используем return_value вместо side_effect
     mock_get_stock_prices.return_value = expected_result_stocks
     mock_get_exchange_rate.return_value = expected_result_rates
 

@@ -3,16 +3,35 @@ import json
 import pytest
 
 from unittest.mock import patch, MagicMock, mock_open
-
+from io import StringIO
 import pandas as pd
 
 from pandas import DataFrame
+
+from src.reports import spending_by_workday
 from src.utils import get_read_excel, path_file, get_required_columns, get_formatted_date, get_list_dict_transactions, \
-    get_to_json_investment_savings, update_user_settings, get_choice_data
+    get_to_json_investment_savings, update_user_settings, get_choice_data, get_decorator
 
 from src.views import get_event_page
 
 from tests.conftest import data_for_test_pd_result, params, transactions_sample_data
+
+
+def test_get_decorator_writes_to_file(sample_data_for_reports, tmp_path):
+    filename = tmp_path / "report_1.log"
+
+    decorated_function = get_decorator(filename=str(filename))(spending_by_workday)
+
+    result = decorated_function(sample_data_for_reports, "2020-04-20")
+
+    with open(filename, 'r', encoding='utf-8') as f:
+        file_content = f.read()
+
+        assert "Function_name: spending_by_workday" in file_content
+        assert "Execution time:" in file_content
+        assert str(result) in file_content
+        assert str(result) == ("   Средние траты в рабочий день  Средние траты в выходной день\n"
+                               "0                       2546.02                         100.15")
 
 
 @patch("pandas.read_excel")

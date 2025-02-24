@@ -1,11 +1,9 @@
 from typing import Any, Hashable
 
-from utils import get_decorator
 from src.utils import path_file, get_read_excel, get_required_columns, get_formatted_date, get_list_dict_transactions, \
     get_to_json_investment_savings
 
 
-@get_decorator
 def get_investment_bank(month: str, transactions:  list[dict[Hashable, Any]], limit: int) -> float:
     """
     Функция производит расчет суммы, которую удалось бы отложить, в случае
