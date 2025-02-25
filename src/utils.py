@@ -190,14 +190,6 @@ def update_user_settings(new_currencies: list[str] = None, new_stocks: list[str]
         with open('./user_settings.json', 'w') as file:
             json.dump({'user_currencies': new_currencies, 'user_stocks': new_stocks}, file, indent=4)
         return f"\n\nДанные успешно переданы."
-    elif new_currencies:
-        with open('./user_settings.json', 'w') as file:
-            json.dump({'user_currencies': new_currencies}, file, indent=4)
-        return f"\n\nДанные успешно переданы."
-    elif new_stocks:
-        with open('./user_settings.json', 'w') as file:
-            json.dump({'user_stocks': new_stocks}, file, indent=4)
-        return f"\n\nДанные успешно переданы."
     else:
         with open('./user_settings.json', 'w') as file:
             file.write("")

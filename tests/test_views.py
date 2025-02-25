@@ -69,6 +69,7 @@ def test_get_event_page_success(
         "MSFT": {"stock": "MSFT", "price": 410.54},
         "TSLA": {"stock": "TSLA", "price": 355.94}
     }
+
     expected_result_rates = {
         "USD": {"currency": "USD", "rate": 91.75},
         "EUR": {"currency": "EUR", "rate": 96.04}
@@ -100,17 +101,11 @@ def test_get_event_page_success(
                 {"category": "Бонусы", "amount": 113.00}
             ]
         },
-        "currency_rates": [
-            {"currency": "USD", "rate": 91.75},
-            {"currency": "EUR", "rate": 96.04}
-        ],
-        "stock_prices": [
-            {"stock": "AAPL", "price": 241.53},
-            {"stock": "AMZN", "price": 230.37},
-            {"stock": "GOOGL", "price": 186.14},
-            {"stock": "MSFT", "price": 410.54},
-            {"stock": "TSLA", "price": 355.94}
-        ]
+        "currency_rates":
+            list(expected_result_rates.values())
+        ,
+        "stock_prices":
+            list(expected_result_stocks.values())
     }
 
     assert result == expected_result

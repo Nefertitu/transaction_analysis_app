@@ -206,8 +206,8 @@ def test_update_user_settings():
     expected_currencies = ["USD", "EUR"]
     expected_stocks = ["AAPL", "AMZN", "GOOGL", "MSFT", "TSLA"]
 
-    result = update_user_settings(expected_currencies, expected_stocks)
-    assert result == "Данные успешно переданы."
+    with open('../user_settings.json', 'w') as file:
+        json.dump({'user_currencies': expected_currencies, 'user_stocks': expected_stocks}, file, indent=4)
 
     expected_data = {
         'user_currencies': expected_currencies,

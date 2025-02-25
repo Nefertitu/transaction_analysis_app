@@ -67,8 +67,18 @@ def get_event_page(transactions: pd.DataFrame, date: str, time_range: str = "M")
         income_categories_data.append({"category": category, "amount": round(amount, 2)})
 
     # Курсы валют и стоимость акций:
-    currency_rates = list((get_exchange_rate("../user_settings.json")).values())
-    stock_prices = list((get_stock_prices("../user_settings.json")).values())
+    result_exchange_rate = get_exchange_rate("../user_settings.json")
+    if isinstance(result_exchange_rate, dict):
+        currency_rates = list((result_exchange_rate).values())
+    else:
+         currency_rates = []
+
+    result_stock_prices = get_stock_prices("../user_settings.json")
+    if isinstance(result_stock_prices, dict):
+        stock_prices = list((result_stock_prices).values())
+    else:
+        stock_prices = []
+
     if currency_rates and stock_prices:
 
     # Данные для преобразования в JSON-строку:
@@ -94,97 +104,95 @@ def get_event_page(transactions: pd.DataFrame, date: str, time_range: str = "M")
                 "main":
                     income_categories_data,
             },
-            "currency_rates": [
-                currency_rates
-            ],
-            "stock_prices": [
+            "currency_rates":
+                currency_rates,
+            "stock_prices":
                     stock_prices
-            ]
         }
 
-    if currency_rates and not stock_prices:
-        data = {
-            "expenses": {
-                "total_amount": expenses_amount,
-                "main": [
-                    categories_expenses_data,
-                ],
-                "transfers_and_cash": [
-                    {
-                        "category": "Наличные",
-                        "amount": cash_amount,
-                    },
-                    {
-                        "category": "Переводы",
-                        "amount": transfers_amount,
-                    }
-                ]
-            },
-            "income": {
-                "total_amount": income_amount,
-                "main":
-                    income_categories_data,
-            },
-            "currency_rates": [
-                currency_rates
-            ],
-        }
-
-    if stock_prices and not currency_rates:
-        data = {
-            "expenses": {
-                "total_amount": expenses_amount,
-                "main": [
-                    list(categories_expenses_data),
-                ],
-                "transfers_and_cash": [
-                    {
-                        "category": "Наличные",
-                        "amount": cash_amount,
-                    },
-                    {
-                        "category": "Переводы",
-                        "amount": transfers_amount,
-                    }
-                ]
-            },
-            "income": {
-                "total_amount": income_amount,
-                "main":
-                    income_categories_data,
-            },
-            "stock_prices": [
-                stock_prices
-            ]
-        }
-
-    else:
-        data = {
-            "expenses": {
-                "total_amount": expenses_amount,
-                "main": [
-                    categories_expenses_data,
-                ],
-                "transfers_and_cash": [
-                    {
-                        "category": "Наличные",
-                        "amount": cash_amount,
-                    },
-                    {
-                        "category": "Переводы",
-                        "amount": transfers_amount,
-                    }
-                ]
-            },
-            "income": {
-                "total_amount": income_amount,
-                "main":
-                    income_categories_data,
-            },
-        }
+    # if currency_rates and not stock_prices:
+    #     data = {
+    #         "expenses": {
+    #             "total_amount": expenses_amount,
+    #             "main": [
+    #                 categories_expenses_data,
+    #             ],
+    #             "transfers_and_cash": [
+    #                 {
+    #                     "category": "Наличные",
+    #                     "amount": cash_amount,
+    #                 },
+    #                 {
+    #                     "category": "Переводы",
+    #                     "amount": transfers_amount,
+    #                 }
+    #             ]
+    #         },
+    #         "income": {
+    #             "total_amount": income_amount,
+    #             "main":
+    #                 income_categories_data,
+    #         },
+    #         "currency_rates": [
+    #             currency_rates
+    #         ],
+    #     }
+    #
+    # if stock_prices and not currency_rates:
+    #     data = {
+    #         "expenses": {
+    #             "total_amount": expenses_amount,
+    #             "main": [
+    #                 list(categories_expenses_data),
+    #             ],
+    #             "transfers_and_cash": [
+    #                 {
+    #                     "category": "Наличные",
+    #                     "amount": cash_amount,
+    #                 },
+    #                 {
+    #                     "category": "Переводы",
+    #                     "amount": transfers_amount,
+    #                 }
+    #             ]
+    #         },
+    #         "income": {
+    #             "total_amount": income_amount,
+    #             "main":
+    #                 income_categories_data,
+    #         },
+    #         "stock_prices": [
+    #             stock_prices
+    #         ]
+    #     }
+    #
+    # else:
+    #     data = {
+    #         "expenses": {
+    #             "total_amount": expenses_amount,
+    #             "main": [
+    #                 categories_expenses_data,
+    #             ],
+    #             "transfers_and_cash": [
+    #                 {
+    #                     "category": "Наличные",
+    #                     "amount": cash_amount,
+    #                 },
+    #                 {
+    #                     "category": "Переводы",
+    #                     "amount": transfers_amount,
+    #                 }
+    #             ]
+    #         },
+    #         "income": {
+    #             "total_amount": income_amount,
+    #             "main":
+    #                 income_categories_data,
+    #         },
+    #     }
 
     # return json.dumps(data, ensure_ascii=False, indent=2)
-    return data
+        return data
 
 # data = {
 #     "Дата операции": ["2025-01-30", "2025-01-29", "2025-12-25", "2025-12-24", "2024-08-31"],
