@@ -106,7 +106,7 @@ def test_get_read_excel(mock_read_excel: str, data_for_test_pd_result: DataFrame
 
 
 @patch("pandas.read_excel")
-def test_get_read_excel_empty(mock_read_excel, data_for_test_pd_result_empty):
+def test_get_read_excel_empty(mock_read_excel, data_for_test_pd_result_empty, capsys):
     """
     Проверяет, что функция читает пустой XLSX-файл и возвращает сообщение,
     что читаемый файл пустой
@@ -118,7 +118,9 @@ def test_get_read_excel_empty(mock_read_excel, data_for_test_pd_result_empty):
     mock_read_excel.return_value = data_for_test_pd_result_empty
     result = get_read_excel("test.xlsx")
 
-    assert result == "Файл пустой."
+    captured = capsys.readouterr()
+    assert captured.out == "Файл пустой.\n"
+    assert type(result) == DataFrame
 
 
 @patch("pandas.read_excel")

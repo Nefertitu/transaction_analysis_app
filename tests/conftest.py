@@ -1,10 +1,8 @@
 import json
 import random
-
-
 import pandas as pd
 import pytest
-from datetime import datetime
+
 from pandas import DataFrame
 
 

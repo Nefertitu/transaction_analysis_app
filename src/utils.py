@@ -1,14 +1,12 @@
 import datetime
 import json
 import logging
+import pandas as pd
 
 from datetime import datetime, timedelta
 from functools import wraps
 from typing import Any, Callable,Hashable, Union
-
-import pandas as pd
 from pathlib import Path
-
 from pandas import DataFrame
 
 
@@ -77,7 +75,7 @@ def get_decorator(filename: str = None) -> Callable[[Callable], Callable]:
     return decorator
 
 
-def get_read_excel(path_to_file: str | Path) -> pd.DataFrame | str:
+def get_read_excel(path_to_file: str | Path) -> pd.DataFrame:
     """
     Считывание данных о финансовых операциях из файла Excel
     :param path_to_file:
@@ -94,7 +92,8 @@ def get_read_excel(path_to_file: str | Path) -> pd.DataFrame | str:
 
     else:
         if data_transactions.empty:
-            return "Файл пустой."
+            print("Файл пустой.")
+            return pd.DataFrame()
 
         else:
             values = {"Номер карты": "*0000", "Категория": data_transactions["Описание"]}
@@ -192,10 +191,12 @@ def update_user_settings(new_currencies: list[str] = None, new_stocks: list[str]
         return f"\n\nДанные успешно переданы."
     else:
         with open('./user_settings.json', 'w') as file:
-            file.write("")
-        return f"\n\nНет данных."
+            json.dump({'user_currencies': [], 'user_stocks': []}, file, indent=4)
 
-# new_currencies = []
+        # return f"\n\nНет данных."
+        return ""
+#
+# new_currencies = ['USD', 'EUR']
 # new_stocks = ['AAPL', 'AMZN']
 # print(update_user_settings(new_currencies, new_stocks))
 
@@ -250,6 +251,7 @@ def get_to_json_views(data_transactions: dict) -> str:
     result = json.dumps(data_transactions, ensure_ascii=False, indent=2)
 
     return result
+
 
 # data = {'expenses': {'total_amount': 2681.82, 'main': [[{'category': 'Другое', 'amount': 2127.32}, {'category': 'Топливо', 'amount': 221.0}, {'category': 'Красота', 'amount': 179.5}, {'category': 'Остальное', 'amount': 154.0}]], 'transfers_and_cash': [{'category': 'Наличные', 'amount': 0.0}, {'category': 'Переводы', 'amount': 0.0}]}, 'income': {'total_amount': 500.0, 'main': [{'category': 'Бонусы', 'amount': 500.0}]}, 'stock_prices': [([{'stock': 'AAPL', 'price': 247.9}, {'stock': 'AMZN', 'price': 214.45}])]}
 # print(get_to_json_views(data))
