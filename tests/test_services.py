@@ -1,14 +1,15 @@
 import pytest
+
 from src.services import get_investment_bank
 
 
 @pytest.mark.parametrize(
     "limit, expected_result",
     [
-        (10, 29.28), # Добавлены ожидаемые результаты для 10 и 50
+        (10, 29.28),  # Добавлены ожидаемые результаты для 10 и 50
         (50, 149.28),
         (100, 299.28),
-    ]
+    ],
 )
 def test_get_investment_bank(limit: int, expected_result: float, dict_sample_data: list[dict]) -> None:
     """

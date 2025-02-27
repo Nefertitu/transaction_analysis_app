@@ -1,12 +1,9 @@
 import json
 import os
 from pathlib import Path
-from typing import Any
 
 import requests
 from dotenv import load_dotenv
-
-from src.utils import path_file
 
 load_dotenv()
 apilayer_key = os.getenv("API_KEY_1")
@@ -23,7 +20,7 @@ def get_exchange_rate(path_to_file: str) -> dict | str:
     with open(path_to_file) as file:
         user_settings = json.load(file)
 
-    user_currencies = user_settings['user_currencies']
+    user_currencies = user_settings["user_currencies"]
 
     headers = {"apikey": f"{apilayer_key}"}
 
@@ -50,7 +47,7 @@ def get_exchange_rate(path_to_file: str) -> dict | str:
 
             if response.status_code == 200:
                 rate = round(response.json()["rates"]["RUB"], 2)
-                results[currency] = {'currency': currency, 'rate': rate}
+                results[currency] = {"currency": currency, "rate": rate}
 
     return results
 
@@ -69,7 +66,7 @@ def get_stock_prices(path_to_file: Path | str) -> dict | str:
     with open(path_to_file) as file:
         user_settings = json.load(file)
 
-    user_stocks = user_settings['user_stocks']
+    user_stocks = user_settings["user_stocks"]
 
     results = {}
     apikey = f"{alphavantage_key}"
@@ -83,10 +80,12 @@ def get_stock_prices(path_to_file: Path | str) -> dict | str:
             for data in result:
                 stock = data["symbol"]
                 price = round(data["price"], 2)
-                results[stock] = {'stock': stock,  "price": price}
+                results[stock] = {"stock": stock, "price": price}
 
         else:
-            return (f"Ошибка при получении данных для {user_stocks}: код статуса {response.status_code}, {response.reason}")
+            return (
+                f"Ошибка при получении данных для {user_stocks}: код статуса {response.status_code}, {response.reason}"
+            )
 
     return results
 

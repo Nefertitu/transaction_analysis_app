@@ -1,10 +1,8 @@
+import logging
 from typing import Any, Hashable
 
-from src.utils import path_file, get_read_excel, get_required_columns, get_formatted_date, get_list_dict_transactions, \
-    get_to_json_investment_savings
 
-
-def get_investment_bank(month: str, transactions:  list[dict[Hashable, Any]], limit: int) -> float:
+def get_investment_bank(month: str, transactions: list[dict[Hashable, Any]], limit: int) -> float | Any:
     """
     Функция производит расчет суммы, которую удалось бы отложить, в случае
     использования сервиса "Инвесткопилка", с учетом задаваемого шага округления
@@ -23,7 +21,13 @@ def get_investment_bank(month: str, transactions:  list[dict[Hashable, Any]], li
             invest_savings.append(accumulation)
 
         else:
-           continue
+            continue
+
+    if invest_savings == []:
+        logging.error(f"\nНет данных:\n {invest_savings}")
+        return 0.0
+
+    logging.info(f"\nПолучен следующий результат:\n {invest_savings}")
 
     return round(sum(invest_savings), 2)
 
