@@ -1,4 +1,4 @@
 {
     "user_currencies": [],
-    "user_stocks": []
+    "user_stocks": ["AAPL", "AMZN", "GOOGL", "MSFT", "TSLA"]
 }

@@ -90,4 +90,4 @@ def get_stock_prices(path_to_file: Path | str) -> dict | str:
     return results
 
 
-# print(get_stock_prices("../user_settings.json"))
+print(get_stock_prices("../user_settings.json"))
