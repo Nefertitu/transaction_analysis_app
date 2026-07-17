@@ -45,7 +45,7 @@ def main_events(path_to_file: str | Path) -> str:
 и период, который следует отобразить в отчете.\n\nДата (в формате ГГГГ-ММ-ДД): """
         )
         pattern = r"\b(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|1[0-9]|2[0-9]|3[01])\b"
-        while re.search(pattern, user_input) is None:
+        # while re.search(pattern, user_input) is None:
             user_input = input("\nВведите дату в формате ГГГГ-ММ-ДД: ")
 
         user_date += user_input
